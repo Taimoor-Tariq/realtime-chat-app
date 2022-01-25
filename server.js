@@ -9,9 +9,17 @@ const
     nextApp = next({ dev }),
     nextHandler = nextApp.getRequestHandler();
 
+let messagesStore = [];
 
 io.on("connection", socket => {
     console.log(`  -> ${socket.id} connected`);
+
+    socket.emit('updateMessages', messagesStore);
+
+    socket.on('newMsg', msg => {
+        messagesStore.push(msg);
+        io.emit('updateMessages', messagesStore);
+    })
 
     socket.on('disconnect', () => {
 		console.log(`  <- ${socket.id} disconnected`);

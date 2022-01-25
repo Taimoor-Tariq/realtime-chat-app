@@ -1,18 +1,54 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
+import { v4 as uuidv4 } from 'uuid';
+import TimeAgo from 'javascript-time-ago';
+import en from 'javascript-time-ago/locale/en.json'
+TimeAgo.addDefaultLocale(en);
+
+const socket = io();
+const timeAgo = new TimeAgo('en-US');
 
 const Page = () => {
     const
-        socket = io(),
-        [username, setUsername] = useState("User"),
-        [message, setMessage] = useState("");
+        [user, setUser] = useState({}),
+        [message, setMessage] = useState(""),
+        [messages, setMessages] = useState([]);
 
-    function sendMessage() {
+    function sendMessage(e) {
+        e.preventDefault();
         socket.emit('newMsg', {
-            sender: username,
-            content: message
-        })
+            sender: user,
+            content: message,
+            time: new Date()
+        });
+
+        setMessage("");
     }
+
+    socket.on('updateMessages', messagesStore => {
+        setMessages(messagesStore);
+        console.log(messages);
+    })
+
+    useEffect(() => {
+        const cookie = require('cookie-cutter');
+
+        let saveUser = {
+            id: uuidv4(),
+            username: `User${Math.floor(Math.random() * 1000) + 100}`
+        },
+        oldUserID = cookie.get('userID');
+        
+        if (oldUserID) setUser({
+            id: oldUserID,
+            username: cookie.get('userName')
+        });
+        else {
+            cookie.set('userID', saveUser.id);
+            cookie.set('userName', saveUser.username);
+            setUser(saveUser)
+        }
+    },[])
 
     const MessageContainer = ({ username = "User", message = "[msg content]", time = "[time]", self = false }) => {
         if (self) return (
@@ -45,13 +81,20 @@ const Page = () => {
         <div className="h-screen w-screen relative flex">
             <div className="flex flex-col w-5/6 h-5/6 overflow-hidden bg-scheme-secondary text-scheme-dark m-auto shadow-lg shadow-scheme-dark rounded-xl">
                 <div className="flex flex-col flex-grow h-0 p-4 overflow-auto">
-                    <MessageContainer />
+                    {messages.map((m, key) => {
+                        return (
+                        <MessageContainer username={m.sender.username} message={m.content} self={m.sender.id == user.id} time={timeAgo.format(new Date(m.time), 'twitter')} key={key} />
+                        )
+                    })}
+                    {/* <MessageContainer />
                     <MessageContainer self={true} />
-                    <MessageContainer />
+                    <MessageContainer /> */}
                 </div>
                 
                 <div className="bg-scheme-tertiary p-4">
-                    <input className="flex items-center h-10 w-full rounded px-3 text-sm" type="text" placeholder="Type your message…" />
+                    <form onSubmit={sendMessage}>
+                        <input className="flex items-center h-10 w-full rounded px-3 text-sm" type="text" placeholder="Type your message…" value={message} onChange={e => {setMessage(e.target.value)}} />
+                    </form>
                 </div>
             </div>
         </div>
@@ -60,7 +103,7 @@ const Page = () => {
 
 Page.getInitialProps = async (ctx) => {
     return {
-        title: "Chat",
+        title: "Chat"
     }
 }
 
