@@ -1,5 +1,5 @@
 const
-    port = 3000,
+    port = parseInt(process.env.PORT, 10) || 3000,
     dev = process.env.NODE_ENV !== 'production',
     next = require('next'),
 
@@ -33,6 +33,7 @@ nextApp.prepare().then(() => {
     });
 
     server.listen(port, () => {
-        console.log("Server started on port 3000")
+        if (err) throw err;
+        console.log(`> Ready on http://localhost:${port}`);
     });
 });
