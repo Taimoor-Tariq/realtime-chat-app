@@ -6,12 +6,14 @@
     "author": "Taimoor-Tariq",
     "license": "MIT",
     "scripts": {
-        "start": "node server.js",
-        "build": "next build"
+        "dev": "node server.js",
+        "build": "next build",
+        "start": "cross-env NODE_ENV=production node server.js"
     },
     "dependencies": {
         "@heroicons/react": "^1.0.5",
         "cookie-cutter": "^0.2.0",
+        "cross-env": "^7.0.3",
         "dotenv": "^14.3.0",
         "express": "^4.17.2",
         "javascript-time-ago": "^2.3.10",
