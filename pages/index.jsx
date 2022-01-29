@@ -81,7 +81,7 @@ const Page = () => {
 
 Page.getInitialProps = async (ctx) => {
     return {
-        title: "TEST",
+        title: "Chat",
     };
 };
 

@@ -21,7 +21,7 @@ const ioHandler = (req, res) => {
             });
         });
 
-        res.socket.server["io"] = io;
+        res.socket.server.io = io;
     }
 
     res.end();
