@@ -8,7 +8,7 @@ import MessageContainer from '../components/MessageContainer';
 
 TimeAgo.addDefaultLocale(en);
 
-let socket = null;
+let socket = io('https://sockets.taimoor.me/');
 const timeAgo = new TimeAgo('en-US');
 
 const Page = () => {
@@ -36,18 +36,14 @@ const Page = () => {
             setUser(saveUser)
         }
 
-        fetch("/api/socket").finally(() => {
-            socket = io();
-
-            socket.on('updateMessages', messagesStore => {
-                setMessages(messagesStore);
-            });
+        socket.on('chat-app-updateMessages', messagesStore => {
+            setMessages(messagesStore);
         });
     }, []);
 
     function sendMessage(e) {
         e.preventDefault();
-        socket.emit('newMsg', {
+        socket.emit('chat-app-newMsg', {
             sender: user,
             content: message,
             time: new Date()
